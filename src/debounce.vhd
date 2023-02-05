@@ -16,7 +16,36 @@ entity debounce is
 end debounce;
 
 architecture Behavioral of debounce is
-
+    signal ffs : std_logic_vector(2 downto 0); 
+    signal sclr, ena: std_logic;
+    constant milliseconds : integer := 1/1000;
 begin
 
+    sclr <= ffs(0) xor ffs(1);
+
+    process(clk, rst)
+        variable count : integer := 0;
+    begin
+        if rst = '1' then
+            ffs <= (others => '0');
+        elsif rising_edge(clk) then
+            ffs(0) <= button;
+            ffs(1) <= ffs(0);
+            if ena = '0' then
+                if sclr = '1' then
+                    count := 0;
+                else
+                    if count < (clk_freq*stable_time*milliseconds) then
+                        count := count + 1;
+                    else
+                        ena <= '1';
+                    end if;
+                end if;
+            else
+                ffs(2) <= ffs(1);
+                ena <= '0';
+            end if;
+        end if;
+    end process;
+    result <= ffs(2);
 end Behavioral;

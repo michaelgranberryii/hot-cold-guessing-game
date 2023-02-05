@@ -12,7 +12,21 @@ entity single_pulse_detector is
 end single_pulse_detector;
 
 architecture Behavioral of single_pulse_detector is
-
+    signal FF1 : std_logic;
+    signal FF2 : std_logic;
 begin
+
+    process (clk, rst)
+    begin
+    if rst = '1' then
+        FF1 <= '0';
+        FF2 <= '0';
+    elsif rising_edge(clk) then
+        FF1 <= input_signal;
+        FF2 <= FF1;
+    end if;
+    end process;
+
+    output_pulse <= FF1 xor FF2;
 
 end Behavioral;
