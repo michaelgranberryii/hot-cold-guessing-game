@@ -26,7 +26,7 @@ begin
     process(clk, rst)
         variable count : integer := 0;
     begin
-        if rst = '1' then
+        if rst = '0' then
             ffs <= (others => '0');
         elsif rising_edge(clk) then
             ffs(0) <= button;
