@@ -33,34 +33,28 @@ uut: entity work.debounce
 
     test: process
     begin
-        rst_tb <= '1';
-        wait for CP;
         rst_tb <= '0';
+        wait for CP;
+        rst_tb <= '1';
         wait for CP;
         
         button_tb <= '1';
-        wait for bounce;
+        wait for 1*CP;
         button_tb <= '0';
-        wait for bounce;
+        wait for 10*CP;
+        
         button_tb <= '1';
-        wait for bounce;
-        button_tb <= '0';
-        wait for bounce;
-        button_tb <= '1';
-        wait for CP;
+        wait for 2*CP;
         button_tb <= '0';
         wait for 10*CP;
 
         button_tb <= '1';
-        wait for bounce;
+        wait for 3*CP;
         button_tb <= '0';
-        wait for bounce;
-        button_tb <= '1';
-        wait for bounce;
-        button_tb <= '0';
-        wait for bounce;
-        button_tb <= '1';
         wait for 10*CP;
+        
+        button_tb <= '1';
+        wait for 4*CP;
         button_tb <= '0';
         wait for 10*CP;
         stop;
