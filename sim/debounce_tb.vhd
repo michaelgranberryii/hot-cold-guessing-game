@@ -39,24 +39,32 @@ uut: entity work.debounce
         wait for CP;
         
         button_tb <= '1';
-        wait for 1*CP;
+        wait for 3*CP;
         button_tb <= '0';
         wait for 10*CP;
-        
-        button_tb <= '1';
-        wait for 2*CP;
-        button_tb <= '0';
-        wait for 10*CP;
-
         button_tb <= '1';
         wait for 3*CP;
         button_tb <= '0';
         wait for 10*CP;
-        
         button_tb <= '1';
-        wait for 4*CP;
+        wait for 500 ms;
         button_tb <= '0';
-        wait for 10*CP;
+        wait for 500 ms;
+        
+--        button_tb <= '1';
+--        wait for 2*CP;
+--        button_tb <= '0';
+--        wait for 10*CP;
+
+--        button_tb <= '1';
+--        wait for 3*CP;
+--        button_tb <= '0';
+--        wait for 10*CP;
+        
+--        button_tb <= '1';
+--        wait for 4*CP;
+--        button_tb <= '0';
+--        wait for 10*CP;
         stop;
     end process;
 
