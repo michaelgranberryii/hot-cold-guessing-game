@@ -25,8 +25,8 @@ uut: entity work.rand_gen
     
     clock: process
     begin
-    clk_tb <= not clk_tb;
-    wait for CP/2;
+        clk_tb <= not clk_tb;
+        wait for CP/2;
     end process;
     
     seed: process
