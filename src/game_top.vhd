@@ -1,157 +1,161 @@
-library IEEE;
-use IEEE.STD_LOGIC_1164.all;
-use IEEE.NUMERIC_STD.all;
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
 
-entity number_guess is
-    port
-    (
-        clk       : in std_logic;
-        rst       : in std_logic;
-        show      : in std_logic;
-        enter     : in std_logic;
-        switches  : in std_logic_vector (3 downto 0);
-        leds      : out std_logic_vector (3 downto 0);
-        red_led   : out std_logic;
-        blue_led  : out std_logic;
-        green_led : out std_logic
+ENTITY number_guess IS
+    PORT (
+        clk : IN STD_LOGIC;
+        rst : IN STD_LOGIC;
+        show : IN STD_LOGIC;
+        enter : IN STD_LOGIC;
+        switches : IN STD_LOGIC_VECTOR (3 DOWNTO 0);
+        leds : OUT STD_LOGIC_VECTOR (3 DOWNTO 0);
+        red_led : OUT STD_LOGIC;
+        blue_led : OUT STD_LOGIC;
+        green_led : OUT STD_LOGIC
     );
-end number_guess;
+END number_guess;
 
-architecture Behavioral of number_guess is
+ARCHITECTURE Behavioral OF number_guess IS
     -- FSM States
-    type StateType is (RESET, GUESSING, CHECKING, ANS); -- game states
-    signal state : StateType; -- current game state
-    
+    TYPE StateType IS (RESET, GUESSING, CHECKING, ANS); -- game states
+    SIGNAL state : StateType; -- current game state
+
     -- Random Number Generator Signals
-    signal seed_top : std_logic_vector(7 downto 0) := X"F6";
-    signal rand_num : std_logic_vector(3 downto 0);
-    
+    SIGNAL seed_top : STD_LOGIC_VECTOR(7 DOWNTO 0) := X"F6";
+    SIGNAL rand_num : STD_LOGIC_VECTOR(3 DOWNTO 0);
+
     -- Button Results
-    signal rst_btn_result, enter_btn_result, show_btn_result : std_logic;
+    SIGNAL rst_btn_result, enter_btn_result, show_btn_result : STD_LOGIC;
 
     -- Constants
-    constant clk_freq : integer := 50_000_000;
-    constant flash_speed : integer := 1_000_000;
-    
-    procedure ToggleLED(variable count : out integer;     
-                        constant clk_freq : integer;
-                        constant flash_speed :  integer;
-                        variable toggle : out boolean) is
-    begin
-        count := count + 1;
-        if count = clk_freq/flash_speed then
-            toggle := not toggle;
-            count := 0;
-        end if;  
-    end procedure;
-begin
+    CONSTANT clk_freq : INTEGER := 50_000_000;
+    CONSTANT flash_speed : INTEGER := 1_000_000;
 
-    -- Reset Button
-    reset_button: entity work.debounce 
-        generic map (
-            --clk_freq => 1000000,
-            stable_time => 10)
-        port map (
-            clk => clk,
-            rst => rst,
-            button => rst,
-            result => rst_btn_result
-        );
-    
-    -- Enter Button
-    enter_button: entity work.debounce 
-        generic map (
-            --clk_freq => 1000000,
-            stable_time => 10)
-        port map (
-            clk => clk,
-            rst => rst,
-            button => enter,
-            result => enter_btn_result
-        );
-        
-    -- Show Button
-    show_button: entity work.debounce 
-        generic map (
-            --clk_freq => 1000000,
-            stable_time => 10)
-        port map (
-            clk => clk,
-            rst => rst,
-            button => show,
-            result => show_btn_result
-        );
-        
-    -- Random Number Generator
-    random_number: entity work.rand_gen
-        port map (
-            clk => clk,
-            rst => rst,
-            seed => seed_top,
-            output => rand_num
-        );
+    -- Procedures
+    PROCEDURE ToggleLED(VARIABLE count : OUT INTEGER;
+    CONSTANT clk_freq : INTEGER;
+    CONSTANT flash_speed : INTEGER;
+    VARIABLE toggle : OUT BOOLEAN) IS
+BEGIN
+    count := count + 1;
+    IF count = clk_freq/flash_speed THEN
+        toggle := NOT toggle;
+        count := 0;
+    END IF;
+END PROCEDURE;
+BEGIN
 
-    process (clk, rst)
-        variable count : integer := 0;
-        variable toggle : boolean := true;
-    begin
-        if rst_btn_result = '0' then
-            state <= GUESSING;
-            blue_led <= '0';
-            red_led <= '0';
-            green_led <= '0';
-            leds <= "0000";
-        elsif rising_edge(clk) then
-            case state is
+-- Reset Button
+reset_button : ENTITY work.debounce
+    GENERIC MAP(
+        --clk_freq => 1000000,
+        stable_time => 10)
+    PORT MAP(
+        clk => clk,
+        rst => rst,
+        button => rst,
+        result => rst_btn_result
+    );
+
+-- Enter Button
+enter_button : ENTITY work.debounce
+    GENERIC MAP(
+        --clk_freq => 1000000,
+        stable_time => 10)
+    PORT MAP(
+        clk => clk,
+        rst => rst,
+        button => enter,
+        result => enter_btn_result
+    );
+
+-- Show Button
+show_button : ENTITY work.debounce
+    GENERIC MAP(
+        --clk_freq => 1000000,
+        stable_time => 10)
+    PORT MAP(
+        clk => clk,
+        rst => rst,
+        button => show,
+        result => show_btn_result
+    );
+
+-- Random Number Generator
+random_number : ENTITY work.rand_gen
+    PORT MAP(
+        clk => clk,
+        rst => rst,
+        seed => seed_top,
+        output => rand_num
+    );
+
+PROCESS (clk, rst)
+    VARIABLE count : INTEGER := 0;
+    VARIABLE toggle : BOOLEAN := true;
+BEGIN
+    IF rst_btn_result = '0' THEN
+        state <= GUESSING;
+        blue_led <= '0';
+        red_led <= '0';
+        green_led <= '0';
+        leds <= "0000";
+    ELSIF rising_edge(clk) THEN
+        CASE state IS
                 -- Guessing State
-                when GUESSING =>
-                if enter_btn_result = '1' then
-                    state <= CHECKING;
-                else
-                    state <= GUESSING;
-                end if;    
-                
-                -- Checking State
-                when CHECKING =>
-                if show_btn_result = '1' then
+            WHEN GUESSING =>
+                IF show_btn_result = '1' THEN
                     state <= ANS;
-                else
-                    if switches < rand_num then
+                ELSIF enter_btn_result = '1' THEN
+                    state <= CHECKING;
+                ELSE
+                    state <= GUESSING;
+                END IF;
+
+                -- Checking State
+            WHEN CHECKING =>
+                IF show_btn_result = '1' THEN
+                    state <= ANS;
+                ELSE
+                    IF switches < rand_num THEN
                         -- turn on blue LED
                         blue_led <= '1';
                         red_led <= '0';
                         green_led <= '0';
                         state <= GUESSING;
 
-                    elsif switches > rand_num then
+                    ELSIF switches > rand_num THEN
                         -- turn on red LED
                         blue_led <= '0';
                         red_led <= '1';
                         green_led <= '0';
                         state <= GUESSING;
-                        
-                    else
+
+                    ELSE
                         -- flash green LED @ 1Hz
                         blue_led <= '0';
                         red_led <= '0';
-                        if toggle then
+                        IF toggle THEN
                             green_led <= '1';
-                            ToggleLED(count, clk_freq,flash_speed, toggle);
-                        else
+                            ToggleLED(count, clk_freq, flash_speed, toggle);
+                        ELSE
                             green_led <= '0';
-                            ToggleLED(count, clk_freq,flash_speed, toggle);
-                        end if;
-                    end if;
-                 end if;
-                 
+                            ToggleLED(count, clk_freq, flash_speed, toggle);
+                        END IF;
+                    END IF;
+                END IF;
+
                 -- Answer State
-                when ANS =>
-                    leds <= rand_num;
-                
+            WHEN ANS =>
+                leds <= rand_num;
+                blue_led <= '0';
+                red_led <= '0';
+                green_led <= '0';
                 -- Others State
-                when others =>
-                    state <= RESET; 
-                end case;             
-        end if;
-    end process;
-end Behavioral;
+            WHEN OTHERS =>
+                state <= RESET;
+        END CASE;
+    END IF;
+END PROCESS;
+END Behavioral;

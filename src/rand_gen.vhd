@@ -1,38 +1,37 @@
-library IEEE;
-use IEEE.STD_LOGIC_1164.all;
-use IEEE.NUMERIC_STD.all;
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
 
-entity rand_gen is
-    port
-    (
-        clk, rst : in std_logic;
-        seed     : in std_logic_vector(7 downto 0);
-        output   : out std_logic_vector (3 downto 0)
+ENTITY rand_gen IS
+    PORT (
+        clk, rst : IN STD_LOGIC;
+        seed : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+        output : OUT STD_LOGIC_VECTOR (3 DOWNTO 0)
     );
-end rand_gen;
+END rand_gen;
 
-architecture Behavioral of rand_gen is
+ARCHITECTURE Behavioral OF rand_gen IS
 
-signal shift_reg : std_logic_vector(7 downto 0);
-signal feedback : std_logic; 
-begin
+    SIGNAL shift_reg : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL feedback : STD_LOGIC;
+BEGIN
 
-process(clk, rst)
-variable flag : boolean := false;
-begin
-if rst = '0' then
-    if flag = false then 
-        shift_reg <= seed;
-        flag := true;
-    else 
-        shift_reg <= shift_reg(6 downto 0) & feedback;
-    end if;
-elsif rising_edge(clk) then
-    flag := false;
-end if;
-end process;
+    PROCESS (clk, rst)
+        VARIABLE is_seeded : BOOLEAN := true;
+    BEGIN
+        IF rst = '0' THEN -- async active low reset
+            IF is_seeded = true THEN -- if is_seed is true then... 
+                shift_reg <= seed; -- set seed
+                is_seeded := false; -- set is_seed to false
+            ELSE
+                shift_reg <= shift_reg(6 DOWNTO 0) & feedback; -- while reset = 0, generate randon number
+            END IF;
+        ELSIF rising_edge(clk) THEN
+            is_seeded := true; -- while reset = 1, set is_seed to true
+        END IF;
+    END PROCESS;
 
-feedback <= shift_reg(3) xor shift_reg(4) xor shift_reg(5);
-output <= shift_reg(7 downto 4);
+    feedback <= shift_reg(3) XOR shift_reg(4) XOR shift_reg(5); -- feedback bit
+    output <= shift_reg(7 DOWNTO 4); -- saved random number
 
-end Behavioral;
+END Behavioral;

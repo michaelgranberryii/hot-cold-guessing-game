@@ -1,89 +1,86 @@
-library IEEE;
-use IEEE.STD_LOGIC_1164.all;
-use IEEE.NUMERIC_STD.all;
-use std.env.stop;
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
+USE std.env.stop;
+ENTITY number_guess_tb IS
 
+END number_guess_tb;
 
-entity number_guess_tb is
+ARCHITECTURE Behavioral OF number_guess_tb IS
+    SIGNAL clk_tb : STD_LOGIC := '0';
+    SIGNAL rst_tb : STD_LOGIC;
+    SIGNAL show_tb : STD_LOGIC;
+    SIGNAL enter_tb : STD_LOGIC;
+    SIGNAL switches_tb : STD_LOGIC_VECTOR (3 DOWNTO 0);
+    SIGNAL leds_tb : STD_LOGIC_VECTOR (3 DOWNTO 0);
+    SIGNAL red_led_tb : STD_LOGIC;
+    SIGNAL blue_led_tb : STD_LOGIC;
+    SIGNAL green_led_tb : STD_LOGIC;
+    CONSTANT CP : TIME := 10 ns;
+BEGIN
 
-end number_guess_tb;
+    uut : ENTITY work.number_guess
+        PORT MAP(
+            clk => clk_tb,
+            rst => rst_tb,
+            show => show_tb,
+            enter => enter_tb,
+            switches => switches_tb,
+            leds => leds_tb,
+            red_led => red_led_tb,
+            blue_led => blue_led_tb,
+            green_led => green_led_tb
+        );
 
-architecture Behavioral of number_guess_tb is
-    signal clk_tb       : std_logic := '0';
-    signal rst_tb       : std_logic;
-    signal show_tb      : std_logic;
-    signal enter_tb     : std_logic;
-    signal switches_tb  : std_logic_vector (3 downto 0);
-    signal leds_tb      : std_logic_vector (3 downto 0);
-    signal red_led_tb   : std_logic;
-    signal blue_led_tb  : std_logic;
-    signal green_led_tb : std_logic;
-    constant CP : time := 10 ns;
-begin
+    clock : PROCESS
+    BEGIN
+        clk_tb <= NOT clk_tb;
+        WAIT FOR CP/2;
+    END PROCESS;
 
-uut: entity work.number_guess 
-    port map (
-        clk => clk_tb,
-        rst => rst_tb,
-        show => show_tb,
-        enter => enter_tb,
-        switches => switches_tb,
-        leds => leds_tb,
-        red_led => red_led_tb,
-        blue_led => blue_led_tb,
-        green_led => green_led_tb
-    );
-    
-clock: process
-    begin
-        clk_tb <= not clk_tb;
-        wait for CP/2;
-    end process;
-    
-test: process
-    begin
-        -- reset
+    test : PROCESS
+    BEGIN
         rst_tb <= '1';
-        wait for 1*CP;
+        WAIT FOR 1 * CP;
         rst_tb <= '0';
-        wait for 2*CP;
+        WAIT FOR 2 * CP;
         rst_tb <= '1';
-        wait for 2*CP;
- 
+        WAIT FOR 2 * CP;
+
         switches_tb <= x"5";
         enter_tb <= '1';
-        wait for 2*CP;
+        WAIT FOR 1 ms;
         enter_tb <= '0';
-        wait for 10*CP;
-        
+        WAIT FOR 1 ms;
+
+        switches_tb <= x"b";
+        enter_tb <= '1';
+        WAIT FOR 1 ms;
+        enter_tb <= '0';
+        WAIT FOR 2 ms;
+
         switches_tb <= x"f";
         enter_tb <= '1';
-        wait for 2*CP;
+        WAIT FOR 1 ms;
         enter_tb <= '0';
-        wait for 10*CP;
-        
-        switches_tb <= x"a";
-        enter_tb <= '1';
-        wait for 2*CP;
-        enter_tb <= '0';
-        wait for 10*CP;
+        WAIT FOR 2 ms;
 
         show_tb <= '1';
-        wait for 2*CP;
+        WAIT FOR 1 ms;
         show_tb <= '0';
-        wait for 30*CP;
+        WAIT FOR 2 ms;
 
         rst_tb <= '0';
-        wait for 2*CP;
+        WAIT FOR 1 ms;
         rst_tb <= '1';
-        wait for 30*CP;
+        WAIT FOR 1 ms;
 
         enter_tb <= '1';
-        wait for 2*CP;
+        WAIT FOR 1 ms;
         enter_tb <= '0';
-        wait for 30*CP;
+        WAIT FOR 1 ms;
         stop;
-             
-    end process;
-    
-end Behavioral;
+
+    END PROCESS;
+
+END Behavioral;

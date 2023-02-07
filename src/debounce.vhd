@@ -1,51 +1,50 @@
-library IEEE;
-use IEEE.STD_LOGIC_1164.all;
-use IEEE.NUMERIC_STD.all;
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
 
-entity debounce is
-    generic
-    (
-        clk_freq    : integer := 50_000_000; --system clock frequency in Hz
-        stable_time : integer := 10);        --time button must remain stable in ms
-    port
-    (
-        clk    : in std_logic;   --input clock
-        rst    : in std_logic;   --asynchronous active low reset
-        button : in std_logic;   --input signal to be debounced
-        result : out std_logic); --debounced signal
-end debounce;
+ENTITY debounce IS
+    GENERIC (
+        clk_freq : INTEGER := 50_000_000; --system clock frequency in Hz
+        stable_time : INTEGER := 10); --time button must remain stable in ms
+    PORT (
+        clk : IN STD_LOGIC; --input clock
+        rst : IN STD_LOGIC; --asynchronous active low reset
+        button : IN STD_LOGIC; --input signal to be debounced
+        result : OUT STD_LOGIC); --debounced signal
+END debounce;
 
-architecture Behavioral of debounce is
-    signal ffs : std_logic_vector(2 downto 0); 
-    signal sclr, ena: std_logic;
-    constant milliseconds : integer := 1/1000;
-begin
+ARCHITECTURE Behavioral OF debounce IS
+    SIGNAL ffs : STD_LOGIC_VECTOR(2 DOWNTO 0);
+    SIGNAL sclr : STD_LOGIC;
+    SIGNAL ena : STD_LOGIC := '0';
+    CONSTANT milliseconds : INTEGER := 1/1000;
+BEGIN
 
-    sclr <= ffs(0) xor ffs(1);
+    sclr <= ffs(0) XOR ffs(1);
 
-    process(clk, rst)
-        variable count : integer := 0;
-    begin
-        if rst = '0' then
-            ffs <= (others => '0');
-        elsif rising_edge(clk) then
+    PROCESS (clk, rst)
+        VARIABLE count : INTEGER := 0;
+    BEGIN
+        IF rst = '0' THEN
+            ffs <= (OTHERS => '0');
+        ELSIF rising_edge(clk) THEN
             ffs(0) <= button;
             ffs(1) <= ffs(0);
-            if ena = '0' then
-                if sclr = '1' then
+            IF ena = '0' THEN
+                IF sclr = '1' THEN
                     count := 0;
-                else
-                    if count < (clk_freq*stable_time*milliseconds) then
+                ELSE
+                    IF count < (clk_freq * stable_time * milliseconds) THEN
                         count := count + 1;
-                    else
+                    ELSE
                         ena <= '1';
-                    end if;
-                end if;
-            else
+                    END IF;
+                END IF;
+            ELSE
                 ffs(2) <= ffs(1);
-                ena <= '0';
-            end if;
-        end if;
-    end process;
+                --ena <= '0';
+            END IF;
+        END IF;
+    END PROCESS;
     result <= ffs(2);
-end Behavioral;
+END Behavioral;

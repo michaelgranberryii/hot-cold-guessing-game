@@ -1,47 +1,56 @@
-library IEEE;
-use IEEE.STD_LOGIC_1164.all;
-use IEEE.NUMERIC_STD.all;
-use std.env.stop;
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
+USE std.env.stop;
 
-entity rand_gen_tb is
+ENTITY rand_gen_tb IS
 
-end rand_gen_tb;
+END rand_gen_tb;
 
-architecture Behavioral of rand_gen_tb is
-        signal clk_tb           : std_logic := '0';
-        signal rst_tb           : std_logic;
-        signal seed_tb          : std_logic_vector(7 downto 0);
-        signal output_tb        : std_logic_vector (3 downto 0);
-        constant CP : time      := 10 ns;
-begin
+ARCHITECTURE Behavioral OF rand_gen_tb IS
+    SIGNAL clk_tb : STD_LOGIC := '0';
+    SIGNAL rst_tb : STD_LOGIC;
+    SIGNAL seed_tb : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL output_tb : STD_LOGIC_VECTOR (3 DOWNTO 0);
+    CONSTANT CP : TIME := 10 ns;
+BEGIN
 
-uut: entity work.rand_gen 
-    port map (
-        clk => clk_tb,
-        rst => rst_tb,
-        seed => seed_tb,
-        output => output_tb
-    );
-    
-    clock: process
-    begin
-        clk_tb <= not clk_tb;
-        wait for CP/2;
-    end process;
-    
-    seed: process
-    begin
-    seed_tb <= x"A5";
-    rst_tb <= '1';
-    wait for CP;
-    rst_tb <= '0';
-    wait for 10*CP;
-    seed_tb <= x"AA";
-    rst_tb <= '1';
-    wait for CP;
-    rst_tb <= '0';
-    wait for 10*CP;
-    stop;
-    end process;
-    
-end Behavioral;
+    uut : ENTITY work.rand_gen
+        PORT MAP(
+            clk => clk_tb,
+            rst => rst_tb,
+            seed => seed_tb,
+            output => output_tb
+        );
+
+    clock : PROCESS
+    BEGIN
+        clk_tb <= NOT clk_tb;
+        WAIT FOR CP/2;
+    END PROCESS;
+
+    seed : PROCESS
+    BEGIN
+        seed_tb <= x"A4";
+        rst_tb <= '1';
+        WAIT FOR 1 * CP;
+        rst_tb <= '0';
+        WAIT FOR 3 * CP;
+        rst_tb <= '1';
+        WAIT FOR 3 * CP;
+
+        -- Reset
+        rst_tb <= '0';
+        WAIT FOR 8 * CP;
+        rst_tb <= '1';
+        WAIT FOR 3 * CP;
+
+        -- Reset
+        rst_tb <= '0';
+        WAIT FOR 16 * CP;
+        rst_tb <= '1';
+        WAIT FOR 3 * CP;
+        stop;
+    END PROCESS;
+
+END Behavioral;
