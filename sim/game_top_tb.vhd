@@ -17,6 +17,7 @@ ARCHITECTURE Behavioral OF number_guess_tb IS
     SIGNAL blue_led_tb : STD_LOGIC;
     SIGNAL green_led_tb : STD_LOGIC;
     CONSTANT CP : TIME := 10 ns;
+    CONSTANT PRESS_TIME : TIME := 13 ms;
 BEGIN
 
     uut : ENTITY work.number_guess
@@ -41,44 +42,44 @@ BEGIN
     test : PROCESS
     BEGIN
         rst_tb <= '1';
-        WAIT FOR 1 * CP;
+        WAIT FOR PRESS_TIME;
         rst_tb <= '0';
-        WAIT FOR 2 * CP;
+        WAIT FOR PRESS_TIME;
         rst_tb <= '1';
-        WAIT FOR 2 * CP;
+        WAIT FOR PRESS_TIME;
 
         switches_tb <= x"5";
         enter_tb <= '1';
-        WAIT FOR 1 ms;
+        WAIT FOR PRESS_TIME;
         enter_tb <= '0';
-        WAIT FOR 1 ms;
-
-        switches_tb <= x"b";
-        enter_tb <= '1';
-        WAIT FOR 1 ms;
-        enter_tb <= '0';
-        WAIT FOR 2 ms;
+        WAIT FOR PRESS_TIME;
 
         switches_tb <= x"f";
         enter_tb <= '1';
-        WAIT FOR 1 ms;
+        WAIT FOR PRESS_TIME;
         enter_tb <= '0';
-        WAIT FOR 2 ms;
+        WAIT FOR PRESS_TIME;
+
+        switches_tb <= x"c";
+        enter_tb <= '1';
+        WAIT FOR PRESS_TIME;
+        enter_tb <= '0';
+        wait for 1000 ms;
 
         show_tb <= '1';
-        WAIT FOR 1 ms;
+        WAIT FOR PRESS_TIME;
         show_tb <= '0';
-        WAIT FOR 2 ms;
+        WAIT FOR 15 ms;
 
         rst_tb <= '0';
-        WAIT FOR 1 ms;
+        WAIT FOR PRESS_TIME;
         rst_tb <= '1';
-        WAIT FOR 1 ms;
+        WAIT FOR PRESS_TIME;
 
-        enter_tb <= '1';
-        WAIT FOR 1 ms;
-        enter_tb <= '0';
-        WAIT FOR 1 ms;
+        show_tb <= '1';
+        WAIT FOR PRESS_TIME;
+        show_tb <= '0';
+        WAIT FOR PRESS_TIME;
         stop;
 
     END PROCESS;
