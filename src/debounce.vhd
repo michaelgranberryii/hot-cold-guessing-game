@@ -14,10 +14,8 @@ ENTITY debounce IS
 END debounce;
 
 ARCHITECTURE Behavioral OF debounce IS
-    SIGNAL ffs : STD_LOGIC_VECTOR(2 DOWNTO 0);
+    SIGNAL ffs : STD_LOGIC_VECTOR(1 DOWNTO 0);
     SIGNAL sclr : STD_LOGIC;
-    SIGNAL ena : STD_LOGIC := '0';
-    CONSTANT milliseconds : INTEGER := 1/1000;
 BEGIN
 
     sclr <= ffs(0) XOR ffs(1);
@@ -26,25 +24,18 @@ BEGIN
         VARIABLE count : INTEGER := 0;
     BEGIN
         IF rst = '0' THEN
-            ffs <= (OTHERS => '0');
+            result <= '0';
+            ffs <= "00";
         ELSIF rising_edge(clk) THEN
             ffs(0) <= button;
             ffs(1) <= ffs(0);
-            IF ena = '0' THEN
-                IF sclr = '1' THEN
-                    count := 0;
-                ELSE
-                    IF count < (clk_freq * stable_time * milliseconds) THEN
-                        count := count + 1;
-                    ELSE
-                        ena <= '1';
-                    END IF;
-                END IF;
+            IF sclr = '1' THEN
+                count := 0;
+            ELSIF count < clk_freq * stable_time/1000 THEN
+                count := count + 1;
             ELSE
-                ffs(2) <= ffs(1);
-                --ena <= '0';
+                result <= ffs(1);
             END IF;
         END IF;
     END PROCESS;
-    result <= ffs(2);
 END Behavioral;
