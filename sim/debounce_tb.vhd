@@ -9,7 +9,7 @@ ARCHITECTURE Behavioral OF debounce_tb IS
     SIGNAL rst_tb : STD_LOGIC;
     SIGNAL button_tb : STD_LOGIC;
     SIGNAL result_tb : STD_LOGIC;
-    CONSTANT CP : TIME := 10 ns;
+    CONSTANT CP : TIME := 20 ns;
     CONSTANT bounce : TIME := 1 ns;
 BEGIN
     uut : ENTITY work.debounce
