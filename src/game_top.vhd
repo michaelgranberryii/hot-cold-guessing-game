@@ -30,7 +30,7 @@ ARCHITECTURE Behavioral OF number_guess IS
 
     -- Constants
     CONSTANT clk_freq : INTEGER := 50_000_000;
-    CONSTANT flash_speed : INTEGER := 1_000_000;
+    CONSTANT flash_speed : INTEGER := 2;
 
     -- Procedures
     PROCEDURE ToggleLED(VARIABLE count : OUT INTEGER;
