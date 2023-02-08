@@ -11,21 +11,18 @@ ENTITY single_pulse_detector IS
 END single_pulse_detector;
 
 ARCHITECTURE Behavioral OF single_pulse_detector IS
-    SIGNAL FF1 : STD_LOGIC;
-    SIGNAL FF2 : STD_LOGIC;
+    SIGNAL FF : STD_LOGIC;
 BEGIN
 
     PROCESS (clk, rst)
     BEGIN
         IF rst = '1' THEN
-            FF1 <= '0';
-            FF2 <= '0';
+            FF <= '0';
         ELSIF rising_edge(clk) THEN
-            FF1 <= input_signal;
-            FF2 <= FF1;
+            FF <= input_signal;
         END IF;
     END PROCESS;
 
-    output_pulse <= FF1 XOR FF2;
+    output_pulse <= NOT FF AND input_signal;
 
 END Behavioral;
