@@ -67,6 +67,7 @@ BEGIN
         enter_tb <= '1';
         WAIT FOR PRESS_TIME;
         enter_tb <= '0';
+        
         wait for 1000 ms;
 
         show_tb <= '1';

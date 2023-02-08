@@ -32,25 +32,10 @@ ARCHITECTURE Behavioral OF number_guess IS
     CONSTANT clk_freq : INTEGER := 50_000_000;
     CONSTANT flash_speed : INTEGER := 2;
 
-    -- Procedures
-    PROCEDURE ToggleLED(VARIABLE count : OUT INTEGER;
-    CONSTANT clk_freq : INTEGER;
-    CONSTANT flash_speed : INTEGER;
-    VARIABLE toggle : OUT BOOLEAN) IS
-BEGIN
-    count := count + 1;
-    IF count = clk_freq/flash_speed THEN
-        toggle := NOT toggle;
-        count := 0;
-    END IF;
-END PROCEDURE;
 BEGIN
 
 -- Reset Button
 reset_button : ENTITY work.debounce
-    GENERIC MAP(
-        --clk_freq => 1000000,
-        stable_time => 10)
     PORT MAP(
         clk => clk,
         rst => rst,
@@ -60,9 +45,6 @@ reset_button : ENTITY work.debounce
 
 -- Enter Button
 enter_button : ENTITY work.debounce
-    GENERIC MAP(
-        --clk_freq => 1000000,
-        stable_time => 10)
     PORT MAP(
         clk => clk,
         rst => rst,
@@ -72,9 +54,6 @@ enter_button : ENTITY work.debounce
 
 -- Show Button
 show_button : ENTITY work.debounce
-    GENERIC MAP(
-        --clk_freq => 1000000,
-        stable_time => 10)
     PORT MAP(
         clk => clk,
         rst => rst,
@@ -133,15 +112,23 @@ BEGIN
                         state <= GUESSING;
 
                     ELSE
-                        -- flash green LED @ 1Hz
+                        -- flash green LED 
                         blue_led <= '0';
                         red_led <= '0';
                         IF toggle THEN
                             green_led <= '1';
-                            ToggleLED(count, clk_freq, flash_speed, toggle);
+                            count := count + 1;
+                            IF count = clk_freq/flash_speed THEN
+                                toggle := NOT toggle;
+                                count := 0;
+                            END IF;
                         ELSE
                             green_led <= '0';
-                            ToggleLED(count, clk_freq, flash_speed, toggle);
+                            count := count + 1;
+                            IF count = clk_freq/flash_speed THEN
+                                toggle := NOT toggle;
+                                count := 0;
+                            END IF;
                         END IF;
                     END IF;
                 END IF;
