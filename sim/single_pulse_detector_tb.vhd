@@ -8,7 +8,7 @@ ENTITY single_pulse_detector_tb IS
 END single_pulse_detector_tb;
 
 ARCHITECTURE Behavioral OF single_pulse_detector_tb IS
-    SIGNAL clk_tb : STD_LOGIC;
+    SIGNAL clk_tb : STD_LOGIC := '1';
     SIGNAL rst_tb : STD_LOGIC;
     SIGNAL input_signal_tb : STD_LOGIC;
     SIGNAL output_pulse_tb : STD_LOGIC;
@@ -24,30 +24,28 @@ BEGIN
 
     PROCESS
     BEGIN
-        clk_tb <= '0';
-        WAIT FOR CP/2;
-        clk_tb <= '1';
+        clk_tb <= NOT clk_tb;
         WAIT FOR CP/2;
     END PROCESS;
 
     PROCESS
     BEGIN
+        -- reset
         rst_tb <= '1';
         WAIT FOR CP;
         rst_tb <= '0';
-        WAIT FOR 5 * CP;
-        input_signal_tb <= '1';
-        WAIT FOR 5 * CP;
+        WAIT FOR 1 * CP;
+
         input_signal_tb <= '0';
-        WAIT FOR 5 * CP;
+        WAIT FOR 4 * CP;
         input_signal_tb <= '1';
-        WAIT FOR CP;
+        WAIT FOR 2 * CP;
         input_signal_tb <= '0';
-        WAIT FOR CP;
+        WAIT FOR 2 * CP;
         input_signal_tb <= '1';
-        WAIT FOR CP;
+        WAIT FOR 2 * CP;
         input_signal_tb <= '0';
-        WAIT FOR 10 * CP;
+        WAIT FOR 4 * CP;
         stop;
     END PROCESS;
 
