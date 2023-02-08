@@ -12,7 +12,7 @@ ARCHITECTURE Behavioral OF single_pulse_detector_tb IS
     SIGNAL rst_tb : STD_LOGIC;
     SIGNAL input_signal_tb : STD_LOGIC;
     SIGNAL output_pulse_tb : STD_LOGIC;
-    CONSTANT CP : TIME := 10 ns;
+    CONSTANT CP : TIME := 20 ns;
 BEGIN
 
     uut : ENTITY work.single_pulse_detector
