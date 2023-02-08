@@ -32,53 +32,32 @@ BEGIN
     test : PROCESS
     BEGIN
         rst_tb <= '0';
-        WAIT FOR CP;
+        WAIT FOR 5 ms;
         rst_tb <= '1';
-        WAIT FOR CP;
+        WAIT FOR 5 ms;
 
-        button_tb <= '1';
-        WAIT FOR 3 * CP;
+        -- bouncing input
         button_tb <= '0';
-        WAIT FOR 3 * CP;
+        WAIT FOR 1 ms;
         button_tb <= '1';
-        WAIT FOR 3 * CP;
+        WAIT FOR 1 ms;
         button_tb <= '0';
-        WAIT FOR 3 * CP;
+        WAIT FOR 1 ms;
         button_tb <= '1';
-        WAIT FOR 3 * CP;
+        WAIT FOR 1 ms;
         button_tb <= '0';
-        WAIT FOR 3 * CP;
+        WAIT FOR 1 ms;
         button_tb <= '1';
-        WAIT FOR 3 * CP;
+        WAIT FOR 1 ms;
         button_tb <= '0';
-        WAIT FOR 3 * CP;
-        button_tb <= '1';
-        WAIT FOR 3 * CP;
-        button_tb <= '0';
-        WAIT FOR 3 * CP;
-        button_tb <= '1';
-        WAIT FOR 3 * CP;
-        button_tb <= '0';
-        WAIT FOR 3 * CP;
-        button_tb <= '1';
-        WAIT FOR 100 * CP;
-        button_tb <= '0';
-        WAIT FOR 100 * CP;
+        WAIT FOR 1 ms;
 
-        --        button_tb <= '1';
-        --        wait for 2*CP;
-        --        button_tb <= '0';
-        --        wait for 10*CP;
+        -- stable input
+        button_tb <= '1';
+        WAIT FOR 20 ms;
+        button_tb <= '0';
+        WAIT FOR 20 ms;
 
-        --        button_tb <= '1';
-        --        wait for 3*CP;
-        --        button_tb <= '0';
-        --        wait for 10*CP;
-
-        --        button_tb <= '1';
-        --        wait for 4*CP;
-        --        button_tb <= '0';
-        --        wait for 10*CP;
         stop;
     END PROCESS;
 
