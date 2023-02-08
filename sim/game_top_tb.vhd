@@ -16,8 +16,8 @@ ARCHITECTURE Behavioral OF number_guess_tb IS
     SIGNAL red_led_tb : STD_LOGIC;
     SIGNAL blue_led_tb : STD_LOGIC;
     SIGNAL green_led_tb : STD_LOGIC;
-    CONSTANT CP : TIME := 10 ns;
-    CONSTANT PRESS_TIME : TIME := 13 ms;
+    CONSTANT CP : TIME := 20 ns;
+    CONSTANT PRESS_TIME : TIME := 15 ms;
 BEGIN
 
     uut : ENTITY work.number_guess
@@ -49,18 +49,21 @@ BEGIN
         WAIT FOR PRESS_TIME;
 
         switches_tb <= x"5";
+        WAIT FOR PRESS_TIME;
         enter_tb <= '1';
         WAIT FOR PRESS_TIME;
         enter_tb <= '0';
         WAIT FOR PRESS_TIME;
 
         switches_tb <= x"f";
+        WAIT FOR PRESS_TIME;
         enter_tb <= '1';
         WAIT FOR PRESS_TIME;
         enter_tb <= '0';
         WAIT FOR PRESS_TIME;
 
-        switches_tb <= x"c";
+        switches_tb <= x"d";
+        WAIT FOR PRESS_TIME;
         enter_tb <= '1';
         WAIT FOR PRESS_TIME;
         enter_tb <= '0';
@@ -72,7 +75,7 @@ BEGIN
         WAIT FOR 15 ms;
 
         rst_tb <= '0';
-        WAIT FOR PRESS_TIME;
+        WAIT FOR 17 ms;
         rst_tb <= '1';
         WAIT FOR PRESS_TIME;
 
