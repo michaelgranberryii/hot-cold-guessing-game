@@ -17,17 +17,17 @@ ARCHITECTURE Behavioral OF rand_gen IS
 BEGIN
 
     PROCESS (clk, rst)
-        VARIABLE is_seeded : BOOLEAN := true;
+        VARIABLE is_seeding : BOOLEAN := true;
     BEGIN
-        IF rst = '0' THEN -- async active low reset
-            IF is_seeded = true THEN -- if is_seed is true then... 
+        IF rst = '1' THEN -- async active low reset
+            IF is_seeding = true THEN -- if is_seed is true then... 
                 shift_reg <= seed; -- set seed
-                is_seeded := false; -- set is_seed to false
+                is_seeding:= false; -- set is_seed to false
             ELSE
                 shift_reg <= shift_reg(6 DOWNTO 0) & feedback; -- while reset = 0, generate randon number
             END IF;
         ELSIF rising_edge(clk) THEN
-            is_seeded := true; -- while reset = 1, set is_seed to true
+        is_seeding := true; -- while reset = 1, set is_seed to true
         END IF;
     END PROCESS;
 
