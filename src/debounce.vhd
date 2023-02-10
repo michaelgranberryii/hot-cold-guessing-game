@@ -17,13 +17,10 @@ ARCHITECTURE Behavioral OF debounce IS
     SIGNAL ffs : STD_LOGIC_VECTOR(1 DOWNTO 0);
     SIGNAL sclr : STD_LOGIC;
 BEGIN
-
-    sclr <= ffs(0) XOR ffs(1);
-
     PROCESS (clk, rst)
         VARIABLE count : INTEGER := 0;
     BEGIN
-        IF rst = '0' THEN
+        IF rst = '1' THEN
             result <= '0';
             ffs <= "00";
         ELSIF rising_edge(clk) THEN
@@ -38,4 +35,5 @@ BEGIN
             END IF;
         END IF;
     END PROCESS;
+    sclr <= ffs(0) XOR ffs(1);
 END Behavioral;
