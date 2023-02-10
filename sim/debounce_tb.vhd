@@ -9,12 +9,12 @@ ARCHITECTURE Behavioral OF debounce_tb IS
     SIGNAL rst_tb : STD_LOGIC;
     SIGNAL button_tb : STD_LOGIC;
     SIGNAL result_tb : STD_LOGIC;
-    CONSTANT CP : TIME := 20 ns;
+    CONSTANT CP : TIME := 8 ns;
     CONSTANT bounce : TIME := 1 ns;
 BEGIN
     uut : ENTITY work.debounce
         GENERIC MAP(
-            clk_freq => 50_000_000,
+            clk_freq => 125_000_000,
             stable_time => 10)
         PORT MAP(
             clk => clk_tb,
@@ -31,12 +31,35 @@ BEGIN
 
     test : PROCESS
     BEGIN
-        rst_tb <= '0';
-        WAIT FOR 5 ms;
-        rst_tb <= '1';
-        WAIT FOR 5 ms;
+         button_tb <= '0';
+         rst_tb <= '1';
+         WAIT FOR 5 ms;
+         rst_tb <= '0';
+         WAIT FOR 5 ms;
 
         -- bouncing input
+        button_tb <= '0';
+        WAIT FOR 1 ms;
+        button_tb <= '1';
+        WAIT FOR 1 ms;
+        button_tb <= '0';
+        WAIT FOR 1 ms;
+        button_tb <= '1';
+        WAIT FOR 1 ms;
+        button_tb <= '0';
+        WAIT FOR 1 ms;
+        button_tb <= '1';
+        WAIT FOR 1 ms;
+        button_tb <= '0';
+        WAIT FOR 1 ms;
+
+        -- stable input
+        button_tb <= '1';
+        WAIT FOR 20 ms;
+        button_tb <= '0';
+        WAIT FOR 20 ms;
+
+         -- bouncing input
         button_tb <= '0';
         WAIT FOR 1 ms;
         button_tb <= '1';

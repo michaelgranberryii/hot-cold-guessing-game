@@ -12,7 +12,7 @@ ARCHITECTURE Behavioral OF rand_gen_tb IS
     SIGNAL rst_tb : STD_LOGIC;
     SIGNAL seed_tb : STD_LOGIC_VECTOR(7 DOWNTO 0);
     SIGNAL output_tb : STD_LOGIC_VECTOR (3 DOWNTO 0);
-    CONSTANT CP : TIME := 20 ns;
+    CONSTANT CP : TIME := 8 ns;
 BEGIN
 
     uut : ENTITY work.rand_gen
@@ -32,23 +32,23 @@ BEGIN
     seed : PROCESS
     BEGIN
         seed_tb <= x"A4";
-        rst_tb <= '1';
-        WAIT FOR 1 * CP;
         rst_tb <= '0';
         WAIT FOR 3 * CP;
         rst_tb <= '1';
+        WAIT FOR 3 * CP;
+        rst_tb <= '0';
         WAIT FOR 3 * CP;
 
         -- Reset
-        rst_tb <= '0';
+        rst_tb <= '1';
         WAIT FOR 8 * CP;
-        rst_tb <= '1';
+        rst_tb <= '0';
         WAIT FOR 3 * CP;
 
         -- Reset
-        rst_tb <= '0';
-        WAIT FOR 16 * CP;
         rst_tb <= '1';
+        WAIT FOR 16 * CP;
+        rst_tb <= '0';
         WAIT FOR 3 * CP;
         stop;
     END PROCESS;
