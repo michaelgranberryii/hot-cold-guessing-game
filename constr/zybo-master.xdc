@@ -30,10 +30,11 @@ set_property IOSTANDARD LVCMOS33 [get_ports rst]
 set_property IOSTANDARD LVCMOS33 [get_ports show]
 
 # Added line 37 do to this error:
-#[Place 30-876] Port 'rst'  is assigned to PACKAGE_PIN 'K18'  which can only be used as the N side of a differential clock input. 
+#[Place 30-876] Port 'rst'  is assigned to PACKAGE_PIN 'K18'  which can only be used as the N side of a differential clock input.
 #Please use the following constraint(s) to pass this DRC check:
 #set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {rst_IBUF}]
 
-set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {rst_IBUF}]
+#set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {rst}]
 
 create_clock -period 8.000 -name sys_clk_pin -waveform {0.000 4.000} -add [get_ports clk]
+
