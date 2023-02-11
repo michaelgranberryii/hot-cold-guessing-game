@@ -3,6 +3,9 @@ USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.NUMERIC_STD.ALL;
 
 ENTITY number_guess IS
+--    GENERIC (
+--        clk_freq_const : INTEGER := 125_000_000 -- clock frequncy
+--    );
     PORT (
         clk : IN STD_LOGIC;
         rst : IN STD_LOGIC;
@@ -22,23 +25,24 @@ ARCHITECTURE Behavioral OF number_guess IS
     SIGNAL state : StateType; -- current game state
 
     -- Random Number Generator Signals
-    SIGNAL seed_top : STD_LOGIC_VECTOR(7 DOWNTO 0) := X"A3";
+    signal seed_top : std_logic_vector(7 downto 0);
+    SIGNAL random_number_top : STD_LOGIC_VECTOR(3 DOWNTO 0);
     SIGNAL secret_number : STD_LOGIC_VECTOR(3 DOWNTO 0);
 
     -- Signal
     SIGNAL rst_btn_result, enter_btn_result, show_btn_result : STD_LOGIC; -- Button Results
-    SIGNAL toggle : STD_LOGIC := '0';
+    SIGNAL toggle : STD_LOGIC;
 
     -- Constants
-    CONSTANT clk_freq_const : INTEGER := 50_000_000; -- clock frequncy
-    CONSTANT flash_speed : INTEGER := 100000; -- number of flashes per second
+    CONSTANT clk_freq_const : INTEGER := 125_000_000; -- clock frequncy
+    CONSTANT flash_speed : INTEGER := 1000; -- number of flashes per second
 
 BEGIN
 
     -- Reset Button
     reset_button : ENTITY work.debounce
         GENERIC MAP(
-            clk_freq => 50_000_000, --system clock frequency in Hz
+            clk_freq => clk_freq_const, --system clock frequency in Hz
             stable_time => 10) --time button must remain stable in ms
         PORT MAP(
             clk => clk,
@@ -50,7 +54,7 @@ BEGIN
     -- Enter Button
     enter_button : ENTITY work.debounce
         GENERIC MAP(
-            clk_freq => 50_000_000, --system clock frequency in Hz
+            clk_freq => clk_freq_const, --system clock frequency in Hz
             stable_time => 10) --time button must remain stable in ms
         PORT MAP(
             clk => clk,
@@ -62,7 +66,7 @@ BEGIN
     -- Show Button
     show_button : ENTITY work.debounce
         GENERIC MAP(
-            clk_freq => 50_000_000, --system clock frequency in Hz
+            clk_freq => clk_freq_const, --system clock frequency in Hz
             stable_time => 10) --time button must remain stable in ms
         PORT MAP(
             clk => clk,
@@ -76,14 +80,27 @@ BEGIN
         PORT MAP(
             clk => clk,
             rst => rst,
-            seed => seed_top,
-            output => secret_number
+            seed => seed_top, 
+            output => random_number_top
         );
+
+    PROCESS (clk, rst)
+        VARIABLE capture : STD_LOGIC := '1';
+    BEGIN
+        IF rst = '1' THEN
+            seed_top <= x"a3";
+            capture := '1';
+        ELSIF enter_btn_result = '1' or show_btn_result = '1' THEN
+            IF capture = '1' THEN
+                secret_number <= random_number_top;
+                capture := '0';
+            END IF;
+        END IF;
+    END PROCESS;
 
     -- FSM Process
     PROCESS (clk, rst)
         VARIABLE count : INTEGER := 0;
-        VARIABLE is_seeded : BOOLEAN := true;
     BEGIN
         IF rst = '1' THEN
             state <= GUESSING;
@@ -91,6 +108,8 @@ BEGIN
             red_led <= '0';
             green_led <= '0';
             leds <= "0000";
+            toggle <= '1';
+--            count := 0;
         ELSIF rising_edge(clk) THEN
 
             -- States
@@ -150,7 +169,7 @@ BEGIN
                 -- flash green LED
                 green_led <= toggle;
                 count := count + 1;
-                IF count < clk_freq_const/flash_speed THEN
+                IF count = (clk_freq_const/flash_speed) - 1 THEN
                     toggle <= NOT toggle;
                     count := 0;
                 END IF;
