@@ -3,9 +3,10 @@ USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.NUMERIC_STD.ALL;
 
 ENTITY number_guess IS
---    GENERIC (
---        clk_freq_const : INTEGER := 125_000_000 -- clock frequncy
---    );
+    GENERIC (
+        clk_freq_const : INTEGER := 125_000_000; -- clock frequncy
+        flash_speed : INTEGER := 2 -- number of flashes per second
+    );
     PORT (
         clk : IN STD_LOGIC;
         rst : IN STD_LOGIC;
@@ -25,17 +26,14 @@ ARCHITECTURE Behavioral OF number_guess IS
     SIGNAL state : StateType; -- current game state
 
     -- Random Number Generator Signals
-    signal seed_top : std_logic_vector(7 downto 0);
+    SIGNAL seed_top : STD_LOGIC_VECTOR(7 DOWNTO 0);
     SIGNAL random_number_top : STD_LOGIC_VECTOR(3 DOWNTO 0);
     SIGNAL secret_number : STD_LOGIC_VECTOR(3 DOWNTO 0);
 
     -- Signal
     SIGNAL rst_btn_result, enter_btn_result, show_btn_result : STD_LOGIC; -- Button Results
     SIGNAL toggle : STD_LOGIC;
-
-    -- Constants
-    CONSTANT clk_freq_const : INTEGER := 125_000_000; -- clock frequncy
-    CONSTANT flash_speed : INTEGER := 1000; -- number of flashes per second
+    SIGNAL count : INTEGER;
 
 BEGIN
 
@@ -80,40 +78,34 @@ BEGIN
         PORT MAP(
             clk => clk,
             rst => rst,
-            seed => seed_top, 
+            seed => seed_top,
             output => random_number_top
         );
 
+    -- Capture Secret Number
     PROCESS (clk, rst)
-        VARIABLE capture : STD_LOGIC := '1';
+        VARIABLE capture : STD_LOGIC;
     BEGIN
         IF rst = '1' THEN
             seed_top <= x"a3";
             capture := '1';
-        ELSIF enter_btn_result = '1' or show_btn_result = '1' THEN
+        ELSIF enter_btn_result = '1' OR show_btn_result = '1' THEN
             IF capture = '1' THEN
                 secret_number <= random_number_top;
                 capture := '0';
             END IF;
         END IF;
     END PROCESS;
-
+    
     -- FSM Process
-    PROCESS (clk, rst)
-        VARIABLE count : INTEGER := 0;
+    FSM : PROCESS (clk, rst)
     BEGIN
         IF rst = '1' THEN
             state <= GUESSING;
-            blue_led <= '0';
-            red_led <= '0';
-            green_led <= '0';
-            leds <= "0000";
-            toggle <= '1';
---            count := 0;
         ELSIF rising_edge(clk) THEN
-
-            -- States
             CASE state IS
+
+
                     -- GUESSING
                 WHEN GUESSING =>
                     IF enter_btn_result = '1' THEN
@@ -131,62 +123,78 @@ BEGIN
                     ELSIF switches = secret_number THEN
                         state <= CORRECT;
                     END IF;
+
                     -- CORRECT
                 WHEN CORRECT =>
                     state <= CORRECT;
 
                     -- ANSWER
                 WHEN ANS =>
-                    state <= ANS;
+                    state <= GUESSING;
 
                     -- OTHERS
                 WHEN OTHERS =>
                     state <= GUESSING;
             END CASE;
         END IF;
+    END PROCESS;
 
-        -- State Ouput
-        CASE state IS
-            WHEN GUESSING =>
-                -- Do nothing
-            WHEN CHECKING =>
-                IF switches < secret_number THEN
-                    -- turn on blue LED
-                    blue_led <= '1';
+    -- State Output
+    state_output : PROCESS (rst, clk, count)
+    BEGIN
+        IF rst = '1' THEN
+            blue_led <= '0';
+            red_led <= '0';
+            green_led <= '0';
+            leds <= "0000";
+            toggle <= '1';
+            count <= 0;
+        ELSIF rising_edge(clk) THEN
+            CASE state IS
+                -- GUESSING OUTPUT
+                WHEN GUESSING => 
+                    -- Do nothing
+                
+                    -- CHECKING OUTPUT
+                WHEN CHECKING =>
+                    IF switches < secret_number THEN
+                        -- turn on blue LED
+                        blue_led <= '1';
+                        red_led <= '0';
+                        green_led <= '0';
+                    ELSIF switches > secret_number THEN
+                        -- turn on red LED
+                        blue_led <= '0';
+                        red_led <= '1';
+                        green_led <= '0';
+                    END IF;
+
+                    -- CORRECT OUTPUT
+                WHEN CORRECT =>
+                    blue_led <= '0';
+                    red_led <= '0';
+                    -- flash green LED
+                    green_led <= toggle;
+                    count <= count + 1;
+                    IF count = (clk_freq_const/flash_speed) - 1 THEN
+                        toggle <= NOT toggle;
+                        count <= 0;
+                    END IF;
+
+                    -- ANSWER OUTPUT
+                WHEN ANS =>
+                    leds <= secret_number;
+                    blue_led <= '0';
                     red_led <= '0';
                     green_led <= '0';
-                ELSIF switches > secret_number THEN
-                    -- turn on red LED
+
+                    -- OTHERS OUTPUT
+                WHEN OTHERS =>
                     blue_led <= '0';
-                    red_led <= '1';
+                    red_led <= '0';
                     green_led <= '0';
-                END IF;
-
-                -- CORRECT
-            WHEN CORRECT =>
-                blue_led <= '0';
-                red_led <= '0';
-                -- flash green LED
-                green_led <= toggle;
-                count := count + 1;
-                IF count = (clk_freq_const/flash_speed) - 1 THEN
-                    toggle <= NOT toggle;
-                    count := 0;
-                END IF;
-
-                -- ANSWER
-            WHEN ANS =>
-                leds <= secret_number;
-                blue_led <= '0';
-                red_led <= '0';
-                green_led <= '0';
-
-                -- OTHERS
-            WHEN OTHERS =>
-                blue_led <= '0';
-                red_led <= '0';
-                green_led <= '0';
-                leds <= "0000";
-        END CASE;
+                    leds <= "0000";
+            END CASE;
+        END IF;
     END PROCESS;
 END Behavioral;
