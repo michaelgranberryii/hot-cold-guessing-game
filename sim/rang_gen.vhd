@@ -33,23 +33,23 @@ BEGIN
     BEGIN
         seed_tb <= x"A4";
         rst_tb <= '0';
-        WAIT FOR 3 * CP;
+        WAIT FOR CP;
         rst_tb <= '1';
-        WAIT FOR 3 * CP;
+        WAIT FOR CP;
         rst_tb <= '0';
-        WAIT FOR 3 * CP;
+        WAIT FOR 10 * CP;
 
         -- Reset
         rst_tb <= '1';
-        WAIT FOR 8 * CP;
+        WAIT FOR 2 * CP;
         rst_tb <= '0';
-        WAIT FOR 3 * CP;
+        WAIT FOR 20 * CP;
 
         -- Reset
         rst_tb <= '1';
-        WAIT FOR 16 * CP;
-        rst_tb <= '0';
         WAIT FOR 3 * CP;
+        rst_tb <= '0';
+        WAIT FOR 30 * CP;
         stop;
     END PROCESS;
 
