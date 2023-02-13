@@ -4,8 +4,9 @@ USE IEEE.NUMERIC_STD.ALL;
 
 ENTITY number_guess IS
     GENERIC (
-        clk_freq_const : INTEGER := 125_000_000; -- clock frequncy
-        flash_speed : INTEGER := 2 -- number of flashes per second
+        CLK_FREQ : INTEGER := 125_000_000; -- clock frequncy
+        FLASH_SPEED : INTEGER := 2; -- number of flashes per second
+        LED_SHIFT_SPEED : INTEGER := 13 -- shift speed of LEDs when rst btn is pressed
     );
     PORT (
         clk : IN STD_LOGIC;
@@ -22,7 +23,7 @@ END number_guess;
 
 ARCHITECTURE Behavioral OF number_guess IS
     -- FSM States
-    TYPE StateType IS (GUESSING, CHECKING, CORRECT, ANS); -- game states
+    TYPE StateType IS (GUESSING, CHECKING, CORRECT); -- game states
     SIGNAL state : StateType; -- current game state
 
     -- Random Number Generator Signals
@@ -30,17 +31,26 @@ ARCHITECTURE Behavioral OF number_guess IS
     SIGNAL random_number_top : STD_LOGIC_VECTOR(3 DOWNTO 0);
     SIGNAL secret_number : STD_LOGIC_VECTOR(3 DOWNTO 0);
 
-    -- Signal
-    SIGNAL rst_btn_result, enter_btn_result, show_btn_result : STD_LOGIC; -- Button Results
+    -- Button Signals
+    SIGNAL rst_btn_result, enter_btn_result, show_btn_result : STD_LOGIC;
+    SIGNAL enter_pulse_out : STD_LOGIC;
+    
+    -- Other Signals
     SIGNAL toggle : STD_LOGIC;
     SIGNAL count : INTEGER;
+    SIGNAL count_rst : INTEGER;
+    SIGNAL is_captured : BOOLEAN;
+    SIGNAL is_reset : BOOLEAN;
+    
+    -- LED Signal
+    SIGNAL led_reset_shift: std_logic_vector(3 downto 0);
 
 BEGIN
 
     -- Reset Button
     reset_button : ENTITY work.debounce
         GENERIC MAP(
-            clk_freq => clk_freq_const, --system clock frequency in Hz
+            clk_freq => CLK_FREQ, --system clock frequency in Hz
             stable_time => 10) --time button must remain stable in ms
         PORT MAP(
             clk => clk,
@@ -52,7 +62,7 @@ BEGIN
     -- Enter Button
     enter_button : ENTITY work.debounce
         GENERIC MAP(
-            clk_freq => clk_freq_const, --system clock frequency in Hz
+            clk_freq => CLK_FREQ, --system clock frequency in Hz
             stable_time => 10) --time button must remain stable in ms
         PORT MAP(
             clk => clk,
@@ -64,13 +74,23 @@ BEGIN
     -- Show Button
     show_button : ENTITY work.debounce
         GENERIC MAP(
-            clk_freq => clk_freq_const, --system clock frequency in Hz
+            clk_freq => CLK_FREQ, --system clock frequency in Hz
             stable_time => 10) --time button must remain stable in ms
         PORT MAP(
             clk => clk,
             rst => rst,
             button => show,
             result => show_btn_result
+        );
+     
+    -- Enter Pulse Detector
+    enter_pulse_dect : entity work.single_pulse_detector
+        generic map (detect_type => "00")
+        port map (
+            clk => clk,
+            rst => rst,
+            input_signal => enter_btn_result,
+            output_pulse => enter_pulse_out
         );
 
     -- Random Number Generator
@@ -83,19 +103,47 @@ BEGIN
         );
 
     -- Capture Secret Number
-    PROCESS (clk, rst)
-        VARIABLE capture : STD_LOGIC;
+    Capture_p: PROCESS (clk, rst)
     BEGIN
         IF rst = '1' THEN
             seed_top <= x"a3";
-            capture := '1';
-        ELSIF enter_btn_result = '1' OR show_btn_result = '1' THEN
-            IF capture = '1' THEN
+            is_captured <= false;
+        ELSIF enter_pulse_out = '1' THEN
+            IF is_captured = false THEN
                 secret_number <= random_number_top;
-                capture := '0';
+                is_captured <= true;
             END IF;
         END IF;
     END PROCESS;
+    
+    Show_p: process (clk, rst)  
+    begin
+    if rising_edge(clk) then
+        if rst = '1' then
+            if is_reset then
+                led_reset_shift<= "0001";
+                is_reset <= false;
+            end if;
+            leds <= led_reset_shift;
+            count_rst  <= count_rst  + 1;
+            IF count_rst  = (CLK_FREQ/LED_SHIFT_SPEED) - 1 THEN
+                led_reset_shift<= led_reset_shift(2 downto 0) & led_reset_shift(3);
+                count_rst  <= 0;
+            END IF;
+        elsif rst = '0' then
+            count_rst  <= 0;
+            leds <= "0000";
+            is_reset <= true;
+        end if;
+        if is_captured then
+            if show_btn_result = '1' then
+                leds <= secret_number;
+            else
+                leds <= "0000";
+            end if;
+        end if;
+    end if;
+    end process;
     
     -- FSM Process
     FSM : PROCESS (clk, rst)
@@ -105,32 +153,25 @@ BEGIN
         ELSIF rising_edge(clk) THEN
             CASE state IS
 
-
                     -- GUESSING
                 WHEN GUESSING =>
-                    IF enter_btn_result = '1' THEN
+                    IF enter_pulse_out = '1' THEN
                         state <= CHECKING;
-                    ELSIF show_btn_result = '1' THEN
-                        state <= ANS;
                     END IF;
 
                     -- CHECKING
                 WHEN CHECKING =>
-                    IF switches < secret_number THEN
+                    IF unsigned(switches) < unsigned(secret_number) THEN
                         state <= GUESSING;
-                    ELSIF switches > secret_number THEN
+                    ELSIF unsigned(switches) > unsigned(secret_number) THEN
                         state <= GUESSING;
-                    ELSIF switches = secret_number THEN
+                    ELSIF unsigned(switches) = unsigned(secret_number) THEN
                         state <= CORRECT;
                     END IF;
 
                     -- CORRECT
                 WHEN CORRECT =>
                     state <= CORRECT;
-
-                    -- ANSWER
-                WHEN ANS =>
-                    state <= GUESSING;
 
                     -- OTHERS
                 WHEN OTHERS =>
@@ -142,19 +183,20 @@ BEGIN
     -- State Output
     state_output : PROCESS (rst, clk, count)
     BEGIN
-        IF rst = '1' THEN
-            blue_led <= '0';
-            red_led <= '0';
-            green_led <= '0';
-            leds <= "0000";
-            toggle <= '1';
-            count <= 0;
-        ELSIF rising_edge(clk) THEN
+        IF rising_edge(clk) THEN
+            IF rst = '1' THEN
+                blue_led <= '0';
+                red_led <= '0';
+                green_led <= '0';
+                toggle <= '1';
+                count <= 0;
+            end if;
+            
             CASE state IS
                 -- GUESSING OUTPUT
                 WHEN GUESSING => 
                     -- Do nothing
-                
+
                     -- CHECKING OUTPUT
                 WHEN CHECKING =>
                     IF switches < secret_number THEN
@@ -176,24 +218,16 @@ BEGIN
                     -- flash green LED
                     green_led <= toggle;
                     count <= count + 1;
-                    IF count = (clk_freq_const/flash_speed) - 1 THEN
+                    IF count = (CLK_FREQ/FLASH_SPEED) - 1 THEN
                         toggle <= NOT toggle;
                         count <= 0;
                     END IF;
-
-                    -- ANSWER OUTPUT
-                WHEN ANS =>
-                    leds <= secret_number;
-                    blue_led <= '0';
-                    red_led <= '0';
-                    green_led <= '0';
 
                     -- OTHERS OUTPUT
                 WHEN OTHERS =>
                     blue_led <= '0';
                     red_led <= '0';
                     green_led <= '0';
-                    leds <= "0000";
             END CASE;
         END IF;
     END PROCESS;

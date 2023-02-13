@@ -21,8 +21,10 @@ ARCHITECTURE Behavioral OF number_guess_tb IS
 BEGIN
 
     uut : ENTITY work.number_guess
-        Generic map (
-            clk_freq_const => 125_000_000 -- clock frequncy
+        generic map (
+            CLK_FREQ => 125_000_000,
+            FLASH_SPEED => 100,
+            LED_SHIFT_SPEED => 500
         )
         PORT MAP(
             clk => clk_tb,
@@ -44,23 +46,18 @@ BEGIN
 
     test : PROCESS
     BEGIN
-
-        rst_tb <= '0';
-        WAIT FOR 2*PRESS_TIME;
-        rst_tb <= '1';
-        WAIT FOR 2*PRESS_TIME;
-        rst_tb <= '0';
-        WAIT FOR PRESS_TIME;
-
-        switches_tb <= x"5";
-        WAIT FOR 4 ms;
-        enter_tb <= '1';
-        WAIT FOR PRESS_TIME;
+    
         enter_tb <= '0';
+        show_tb <= '0';
+        rst_tb <= '0';
+        WAIT FOR PRESS_TIME;
+        rst_tb <= '1';
+        WAIT FOR PRESS_TIME;
+        rst_tb <= '0';
         WAIT FOR PRESS_TIME;
 
-        switches_tb <= x"f";
-        WAIT FOR PRESS_TIME;
+        switches_tb <= x"1";
+        WAIT FOR 8 ms;
         enter_tb <= '1';
         WAIT FOR PRESS_TIME;
         enter_tb <= '0';
@@ -71,23 +68,20 @@ BEGIN
         enter_tb <= '1';
         WAIT FOR PRESS_TIME;
         enter_tb <= '0';
+        WAIT FOR PRESS_TIME;
         
-        wait for 10 ms;
-
-       show_tb <= '1';
-       WAIT FOR PRESS_TIME;
-       show_tb <= '0';
-       WAIT FOR 15 ms;
-
-        rst_tb <= '1';
-        WAIT FOR 17 ms;
-        rst_tb <= '0';
-        WAIT FOR PRESS_TIME;
-
         show_tb <= '1';
-        WAIT FOR 11 ms;
-        show_tb <= '0';
         WAIT FOR PRESS_TIME;
+        show_tb <= '0';
+        WAIT FOR 15 ms;
+
+        switches_tb <= x"5";
+        WAIT FOR PRESS_TIME;
+        enter_tb <= '1';
+        WAIT FOR PRESS_TIME;
+        enter_tb <= '0';
+        
+        wait for 100 ms;
         stop;
 
     END PROCESS;

@@ -8,7 +8,7 @@ ENTITY debounce IS
         stable_time : INTEGER := 10); --time button must remain stable in ms
     PORT (
         clk : IN STD_LOGIC; --input clock
-        rst : IN STD_LOGIC; --asynchronous active low reset
+        rst : IN STD_LOGIC; --asynchronous active high reset
         button : IN STD_LOGIC; --input signal to be debounced
         result : OUT STD_LOGIC); --debounced signal
 END debounce;
