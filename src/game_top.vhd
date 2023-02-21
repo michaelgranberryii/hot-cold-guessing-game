@@ -5,7 +5,7 @@ USE IEEE.NUMERIC_STD.ALL;
 ENTITY number_guess IS
     GENERIC (
         CLK_FREQ : INTEGER := 125_000_000; -- clock frequncy
-        FLASH_SPEED : INTEGER := 2; -- number of flashes per second
+        FLASH_SPEED : INTEGER := 2; -- 1 Hz
         LED_SHIFT_SPEED : INTEGER := 13 -- shift speed of LEDs when rst btn is pressed
     );
     PORT (
