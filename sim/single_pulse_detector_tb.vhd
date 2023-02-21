@@ -15,7 +15,7 @@ ARCHITECTURE Behavioral OF single_pulse_detector_tb IS
     SIGNAL output_pulse_01_tb : STD_LOGIC;
     SIGNAL output_pulse_10_tb : STD_LOGIC;
     SIGNAL output_pulse_11_tb : STD_LOGIC;
-    CONSTANT CP : TIME := 20 ns;
+    CONSTANT CP : TIME := 8 ns;
 BEGIN
 
     -- Rising Edge
