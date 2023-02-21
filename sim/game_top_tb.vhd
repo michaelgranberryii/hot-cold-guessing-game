@@ -24,7 +24,7 @@ BEGIN
         generic map (
             CLK_FREQ => 125_000_000,
             FLASH_SPEED => 100,
-            LED_SHIFT_SPEED => 500
+            LED_SHIFT_SPEED => 200
         )
         PORT MAP(
             clk => clk_tb,
@@ -52,7 +52,7 @@ BEGIN
         rst_tb <= '0';
         WAIT FOR PRESS_TIME;
         rst_tb <= '1';
-        WAIT FOR PRESS_TIME;
+        WAIT FOR 2*PRESS_TIME;
         rst_tb <= '0';
         WAIT FOR PRESS_TIME;
 
@@ -73,7 +73,7 @@ BEGIN
         show_tb <= '1';
         WAIT FOR PRESS_TIME;
         show_tb <= '0';
-        WAIT FOR 15 ms;
+        WAIT FOR PRESS_TIME;
 
         switches_tb <= x"5";
         WAIT FOR PRESS_TIME;
